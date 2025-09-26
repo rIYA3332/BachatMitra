@@ -1,0 +1,8 @@
+id,type,amount,category,account,note,date
+1,Income,2000,Allowance,Cash,other,12/12/2022
+3,Income,1,Allowance,Cash,wje,9/16/2025
+,,,,,,9/16/2025
+1,Income,110000.00,Allowance,Cash,nd,2025-09-18
+4,Income,2000.00,Allowance,Cash,dsd,9/18/2025
+5,Expense,1000.00,Food,Cash,sjd,9/18/2025
+6,Income,3000.00,Salary,Cash,jsnd,9/26/2025

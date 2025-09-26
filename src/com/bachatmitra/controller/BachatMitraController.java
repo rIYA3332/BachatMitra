@@ -1,109 +1,73 @@
 package com.bachatmitra.controller;
 
-
-
 import com.bachatmitra.model.*;
+import com.bachatmitra.view.TransactionView;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.Scanner;
-
-/**
- *
- * @author Riya Bhatta
- */
-
 /*
- * Controller class for Bachat Mitra application
- * Handles user input and manages income transactions
+ * BachatMitraController acts as the "Controller" in the MVC architecture.
+ * - It connects the View (TransactionView) with the Model (TransactionManager).
+ * - Displays menu options to the user and reads their input.
+ * - Handles actions like adding income, adding expense, viewing all transactions, and exiting.
+ * - Uses TransactionManager to perform operations and TransactionView to interact with the user.
+ * - Runs in a loop until the user chooses to exit, while also handling errors gracefully.
  */
-
+// It handles input, processes it, and updates output.
 public class BachatMitraController {
-
     private TransactionManager manager;
-    private Scanner scanner;
+    private TransactionView view;
 
     public BachatMitraController() {
         manager = new TransactionManager();
-        scanner = new Scanner(System.in);
+        view = new TransactionView();
     }
 
     public void run() {
-        System.out.println("***Bachat Mitra***");
+        boolean running = true;
+        while (running) { // running = true keeps the program going until the user chooses to exit.
+            view.showMainMenu();
+            int choice = view.readChoice();
+            try {
+                switch (choice) {
+                    case 1:
+                        double incomeAmt = view.readAmount();
+                        String incomeCat = view.chooseIncomeCategory();
+                        String incomeAcc = view.chooseAccount();
+                        String incomeNote = view.readNote();
+                        Transaction i = manager.addIncome(
+                                incomeAmt, incomeCat, incomeAcc, incomeNote,
+                                LocalDate.now().toString()
+                        );
+                        view.showTransactionAdded(i);
+                        break;
 
-        while (true) {
-            System.out.println("\n1. Add Income");
-            System.out.println("2. Exit");
-            System.out.print("Choose: ");
-            String choice = scanner.nextLine().trim();
+                    case 2:
+                        double expAmt = view.readAmount();
+                        String expCat = view.chooseExpenseCategory();
+                        String expAcc = view.chooseAccount();
+                        String expNote = view.readNote();
+                        Transaction e = manager.addExpense(
+                                expAmt, expCat, expAcc, expNote,
+                                LocalDate.now().toString()
+                        );
+                        view.showTransactionAdded(e);
+                        break;
 
-            switch (choice) {
-                case "1" -> addIncomeFlow();
-                case "2" -> exitProgram();
-                default -> System.out.println("Invalid choice.");
+                    case 3:
+                        view.showAllTransactions(manager.getAllTransactions());
+                        break;
+                    case 4: //newly added
+                        view.showCategoryStatistics(manager);
+                        break;
+                    case 5:
+                        view.showExitMessage();
+                        running = false;
+                        break;
+                    default:
+                        view.showError("Invalid choice.");
+                }
+            } catch (Exception ex) {
+                view.showError(ex.getMessage());
             }
         }
     }
-
-    // exception handling
-    private void addIncomeFlow() {
-        try {
-            System.out.print("Amount: ");
-            double amount = Double.parseDouble(scanner.nextLine().trim());
-
-            // Category selection
-            System.out.println("Choose Category:");
-            System.out.println("1. Allowance\n2. Salary\n3. Petty Cash\n4. Bonus\n5. Other");
-            String categoryChoice = scanner.nextLine().trim();
-            String category = switch (categoryChoice) {
-                case "1" -> "Allowance";
-                case "2" -> "Salary";
-                case "3" -> "Petty Cash";
-                case "4" -> "Bonus";
-                default -> "Other";
-            };
-
-            // Account selection
-            System.out.println("Choose Account:");
-            System.out.println("1. Cash\n2. Account\n3. Card");
-            String accountChoice = scanner.nextLine().trim();
-            String account = switch (accountChoice) {
-                case "1" -> "Cash";
-                case "2" -> "Account";
-                case "3" -> "Card";
-                default -> "Cash";
-            };
-
-            System.out.print("Note: ");
-            String note = scanner.nextLine().trim();
-
-            LocalDate date = readDateOrToday();
-
-            Transaction t = manager.addIncome(amount, category, account, note, date);
-            System.out.println("Income added: " + t);
-
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid number format.");
-        } catch (InvalidTransactionException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
-    // exception handling
-    private LocalDate readDateOrToday() {
-        System.out.print("Date (yyyy-MM-dd) or press ENTER for today: ");
-        String s = scanner.nextLine().trim();
-        if (s.isEmpty()) return LocalDate.now();
-        try {
-            return LocalDate.parse(s);
-        } catch (DateTimeParseException e) {
-            System.out.println("Bad date, using today.");
-            return LocalDate.now();
-        }
-    }
-
-    private void exitProgram() {
-        System.out.println("Exiting. Goodbye!");
-        System.exit(0);
-    }
 }
-
